@@ -1,62 +1,47 @@
-#!/usr/bin/env node
+const http = require('http');
+const { URL } = require('url');
 
-const express = require("express");
-const axios = require("axios");
-const NodeCache = require("node-cache");
-const { Command } = require("commander");
+const PORT = 4000;
+const TARGET = 'http://jsonplaceholder.typicode.com'; // Servidor real
+const cache = new Map(); // Cache em memória
 
-const app = express();
-const cache = new NodeCache({
-  stdTTL: 60,
-});
+// Criação do servidor proxy
+const server = http.createServer((req, res) => {
+    const url = new URL(req.url, TARGET);
+    const cacheKey = url.toString();
 
-const program = new Command();
+    // Se a resposta já estiver no cache, retorna diretamente
+    if (cache.has(cacheKey)) {
+        console.log(`🔄 Servindo do cache: ${cacheKey}`);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(cache.get(cacheKey));
+        return;
+    }
 
-program
-  .version("1.0.0")
-  .description("Proxy Server CLI with Caching")
-  .option("-p, --port <number>", "Porta do proxy", "3000")
-  .option("-t, --target <url>", "URL do servidor real")
-  .parse(process.argv);
+    console.log(`➡️ Encaminhando requisição para ${url.href}`);
 
-const options = program.opts();
+    // Faz a requisição ao servidor real
+    http.get(url, (proxyRes) => {
+        let data = '';
 
-if (!options.target) {
-  console.error(
-    "Erro: Você precisa fornecer um servidor de destino com --target <URL>"
-  );
-  process.exit(1);
-}
+        proxyRes.on('data', (chunk) => {
+            data += chunk;
+        });
 
-const PORT = options.port;
-const TARGET_URL = options.target;
-
-app.use(async (req, res) => {
-  const cacheKey = `${req.method}:${req.url}`;
-
-  const cachedResponse = cache.get(cacheKey);
-  if (cachedResponse) {
-    console.log(`Cache hit: ${req.url}`);
-    return res.send(cachedResponse);
-  }
-
-  try {
-    console.log(`Cache miss: ${req.url}, encaminhando para ${TARGET_URL}`);
-    const response = await axios({
-      method: req.method,
-      url: `${TARGET_URL}${req.url}`,
-      headers: req.headers,
-      data: req.body,
+        proxyRes.on('end', () => {
+            // Armazena a resposta no cache
+            cache.set(cacheKey, data);
+            res.writeHead(proxyRes.statusCode, proxyRes.headers);
+            res.end(data);
+        });
+    }).on('error', (err) => {
+        console.error(`Erro ao acessar ${url.href}: ${err.message}`);
+        res.writeHead(500);
+        res.end('Erro interno no servidor proxy');
     });
-
-    cache.set(cacheKey, response.data);
-    res.send(response.data);
-  } catch (error) {
-    res.status(error.response?.status || 500).send(error.message);
-  }
 });
 
-app.listen(PORT, () => {
-    console.log("Servidor proxy rodando na porta", PORT);
-    console.log("Encaminhando requisições para", TARGET_URL);
-})
+// Inicia o servidor proxy
+server.listen(PORT, () => {
+    console.log(`🚀 Proxy rodando em http://localhost:${PORT}`);
+});
