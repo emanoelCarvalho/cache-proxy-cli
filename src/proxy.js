@@ -4,7 +4,6 @@ const { URL } = require("url");
 const config = require("./config");
 
 const PORT = config.getEnv("PORT");
-console.log(PORT);
 const TARGET = config.getEnv("TARGET");
 
 const cache = new Map();
