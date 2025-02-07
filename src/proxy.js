@@ -1,19 +1,12 @@
 const http = require("http");
 const { URL } = require("url");
-const EnvService = require("./services/env.config")
 
-// const config = require("./services/configService");
-
-// const PORT = config.getEnv("PORT");
-// const TARGET = config.getEnv("TARGET");
 
 const configService = new EnvService();
+const cache = new Map();
+
 const PORT = configService.getPort;
 const TARGET = configService.getTarget;
-
-console.log(`Target: ${TARGET}`);
-
-const cache = new Map();
 
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, TARGET);
