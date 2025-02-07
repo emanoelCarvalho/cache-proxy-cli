@@ -9,7 +9,8 @@ const PORT = configService.getPort;
 const TARGET = configService.getTarget;
 
 const server = http.createServer((req, res) => {
-  const url = new URL(req.url, TARGET);
+  const endpoint = req.url === "/" ? "/posts" : req.url;
+  const url = new URL(endpoint, TARGET);
   const cacheKey = url.toString();
 
   const cacheData = getFromCache(cacheKey);
