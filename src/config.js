@@ -1,15 +1,13 @@
-require("dotenv").config();
+require('dotenv').config(); // Carrega as variáveis de ambiente
 
-const requiredEnvVars = ["PORT", "TARGET"];
+const requiredVars = ["PORT", "TARGET"];
 
-requiredEnvVars.forEach((envVar) => {
-  if (!process.env[envVar]) {
-    throw new Error(`${envVar} não foi definida no arquivo .env`);
-  }
-});
+if (requiredVars.some((env) => !process.env[env])) {
+    throw new Error("Variáveis de ambiente não configuradas");
+}
 
 const getEnv = (key) => process.env[key];
 
 module.exports = {
-  getEnv,
+    getEnv
 };
