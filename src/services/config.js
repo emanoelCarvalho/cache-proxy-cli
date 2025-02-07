@@ -1,5 +1,5 @@
-require('dotenv').config(); // Carrega as variáveis de ambiente
-
+require('dotenv').config(); 
+    
 const requiredVars = ["PORT", "TARGET"];
 
 if (requiredVars.some((env) => !process.env[env])) {
