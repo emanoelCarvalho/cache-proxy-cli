@@ -1,10 +1,9 @@
 const http = require("http");
 const { URL } = require("url");
-
+const EnvService = require("../config/env.config");
+const { getFromCache, setToCache } = require("../cacheService");
 
 const configService = new EnvService();
-const cache = new Map();
-
 const PORT = configService.getPort;
 const TARGET = configService.getTarget;
 
@@ -12,10 +11,11 @@ const server = http.createServer((req, res) => {
   const url = new URL(req.url, TARGET);
   const cacheKey = url.toString();
 
-  if (cache.has(cacheKey)) {
+  const cacheData = getFromCache(cacheKey);
+  if (cacheData) {
     console.log(`🔄 Servindo do cache: ${cacheKey}`);
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(cache.get(cacheKey));
+    res.writeHead(200, { "content-type": "application/json" });
+    res.end(cacheData);
     return;
   }
 
@@ -30,7 +30,7 @@ const server = http.createServer((req, res) => {
       });
 
       proxyRes.on("end", () => {
-        cache.set(cacheKey, data);
+        setToCache(cacheKey, data);
         res.writeHead(proxyRes.statusCode, proxyRes.headers);
         res.end(data);
       });
@@ -43,5 +43,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`🚀 Proxy rodando em http://localhost:${PORT}`);
+  console.log(`🚀 Servidor proxy rodando em http://localhost:${PORT}`);
 });
