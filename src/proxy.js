@@ -1,7 +1,7 @@
 const http = require("http");
 const { URL } = require("url");
-const EnvService = require("../config/env.config");
-const { getFromCache, setToCache } = require("../cacheService");
+const EnvService = require("../src/services/config/env.config");
+const { getFromCache, setToCache } = require("../src/services/cacheService");
 
 const configService = new EnvService();
 const PORT = configService.getPort;
