@@ -1,7 +1,7 @@
 const http = require("http");
 const { URL } = require("url");
 
-const config = require("./config");
+const config = require("./services/configService");
 
 const PORT = config.getEnv("PORT");
 const TARGET = config.getEnv("TARGET");
