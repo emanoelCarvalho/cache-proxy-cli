@@ -1,8 +1,11 @@
 const http = require("http");
 const { URL } = require("url");
 
-const PORT = 4000;
-const TARGET = "http://jsonplaceholder.typicode.com";
+const config = require("./config");
+
+const PORT = config.getEnv("PORT");
+const TARGET = config.getEnv("TARGET");
+
 const cache = new Map();
 
 const server = http.createServer((req, res) => {
