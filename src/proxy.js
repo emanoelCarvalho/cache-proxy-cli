@@ -2,6 +2,7 @@ const http = require("http");
 const { URL } = require("url");
 const EnvService = require("../src/services/config/env.config");
 const { getFromCache, setToCache } = require("../src/services/cacheService");
+const { log } = require("./utils/logger");
 
 const configService = new EnvService();
 const PORT = configService.getPort;
@@ -13,13 +14,13 @@ const server = http.createServer((req, res) => {
 
   const cacheData = getFromCache(cacheKey);
   if (cacheData) {
-    console.log(`🔄 Servindo do cache: ${cacheKey}`);
+    log(`🚀 Cache HIT para ${url.href}`);
     res.writeHead(200, { "content-type": "application/json" });
     res.end(cacheData);
     return;
   }
 
-  console.log(`➡️ Encaminhando requisição para ${url.href}`);
+  log(`🌐 Acessando ${url.href}`);
 
   http
     .get(url, (proxyRes) => {
@@ -36,12 +37,12 @@ const server = http.createServer((req, res) => {
       });
     })
     .on("error", (err) => {
-      console.error(`Erro ao acessar ${url.href}: ${err.message}`);
+      log(`❌ Erro ao acessar ${url.href}: ${err.message}`);
       res.writeHead(500);
       res.end("Erro interno no servidor proxy");
     });
 });
 
 server.listen(PORT, () => {
-  console.log(`🚀 Servidor proxy rodando em http://localhost:${PORT}`);
+  log(`🚀 Servidor proxy rodando em http://localhost:${PORT}`);
 });
