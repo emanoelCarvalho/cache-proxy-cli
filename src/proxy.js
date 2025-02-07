@@ -1,16 +1,16 @@
 const http = require("http");
+const https = require("https");
 const { URL } = require("url");
-const EnvService = require("../src/services/config/env.config");
 const { getFromCache, setToCache } = require("../src/services/cacheService");
 const { log } = require("./utils/logger");
 
-const configService = new EnvService();
-const PORT = configService.getPort;
-const TARGET = configService.getTarget;
+const config = require("./config/config");
+
+const PORT = config.port;
+const TARGET = config.target;
 
 const server = http.createServer((req, res) => {
-  const endpoint = req.url === "/" ? "/posts" : req.url;
-  const url = new URL(endpoint, TARGET);
+  const url = new URL(req.url, TARGET);
   const cacheKey = url.toString();
 
   const cacheData = getFromCache(cacheKey);
@@ -23,7 +23,9 @@ const server = http.createServer((req, res) => {
 
   log(`🌐 Acessando ${url.href}`);
 
-  http
+  const client = url.protocol === "https:" ? https : http;
+
+  client
     .get(url, (proxyRes) => {
       let data = "";
 

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1", 
+    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/proxy.js"
   },
   "keywords": [],
@@ -14,6 +14,7 @@
     "axios": "^1.7.9",
     "commander": "^13.1.0",
     "dotenv": "^16.4.7",
-    "node-cache": "^5.1.2"
+    "node-cache": "^5.1.2",
+    "yargs": "^17.7.2"
   }
 }
